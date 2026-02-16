@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Clipper Studio - Cuplikan Seru ID</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 min-h-screen p-6 text-slate-800">
+    <div class="max-w-xl mx-auto space-y-6">
+        <header class="text-center text-white py-4">
+            <h1 class="text-3xl font-black italic">CLIPPING <span class="text-red-500">STUDIO</span></h1>
+        </header>
+
+        <div class="bg-white p-8 rounded-3xl shadow-xl">
+            <h2 class="text-lg font-bold mb-4 border-b pb-2">1. YouTube Downloader</h2>
+            <div class="space-y-4">
+                <input type="text" id="url" placeholder="URL YouTube" class="w-full p-3 border-2 rounded-xl outline-none focus:border-red-500">
+                <div class="flex gap-2">
+                    <input type="text" id="start" placeholder="Start 00:00:00" class="flex-1 p-3 border-2 rounded-xl">
+                    <input type="text" id="end" placeholder="End 00:05:00" class="flex-1 p-3 border-2 rounded-xl">
+                </div>
+                <input type="text" id="custom_name" placeholder="Nama File (Opsional)" class="w-full p-3 border-2 rounded-xl">
+                <select id="mode" class="w-full p-3 border-2 rounded-xl">
+                    <option value="landscape">Landscape</option>
+                    <option value="portrait">Portrait (Reels)</option>
+                </select>
+                <button onclick="proses('download')" id="btn-dl" class="w-full bg-red-600 text-white py-4 rounded-2xl font-bold hover:bg-red-700 transition">GAS DOWNLOAD!</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-xl">
+            <h2 class="text-lg font-bold mb-4 border-b pb-2">2. Convert Lokal ke Portrait</h2>
+            <div class="space-y-4">
+                <input type="file" id="file-input" accept="video/mp4" class="block w-full text-sm text-slate-500 border-2 border-dashed p-4 rounded-xl">
+                <button onclick="proses('convert')" id="btn-cv" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition">CONVERT SEKARANG</button>
+            </div>
+        </div>
+
+        <div id="status" class="hidden p-6 bg-white rounded-3xl text-center shadow-xl font-bold"></div>
+    </div>
+
+    <script>
+        async function proses(tipe) {
+            const btnDl = document.getElementById('btn-dl');
+            const btnCv = document.getElementById('btn-cv');
+            const status = document.getElementById('status');
+
+            // Disable Tombol & Tampilkan Status
+            btnDl.disabled = true; btnCv.disabled = true;
+            btnDl.classList.add('opacity-50'); btnCv.classList.add('opacity-50');
+            status.classList.remove('hidden');
+            status.className = "block p-6 bg-white rounded-3xl text-center shadow-xl font-bold text-blue-600";
+            status.innerText = "⏳ Sedang memproses... Harap tunggu sebentar.";
+
+            try {
+                let res;
+                if (tipe === 'download') {
+                    res = await fetch('/download', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            url: document.getElementById('url').value,
+                            start: document.getElementById('start').value,
+                            end: document.getElementById('end').value,
+                            mode: document.getElementById('mode').value,
+                            custom_name: document.getElementById('custom_name').value
+                        })
+                    });
+                } else {
+                    const formData = new FormData();
+                    formData.append('file', document.getElementById('file-input').files[0]);
+                    res = await fetch('/convert', { method: 'POST', body: formData });
+                }
+
+                const result = await res.json();
+                if (result.status === 'success') {
+                    status.innerText = "✅ " + result.message;
+                    status.classList.replace('text-blue-600', 'text-green-600');
+                } else {
+                    status.innerText = "❌ Error: " + result.message;
+                    status.classList.replace('text-blue-600', 'text-red-600');
+                }
+            } catch (err) {
+                status.innerText = "❌ Gagal menyambung ke server lokal.";
+            } finally {
+                // Aktifkan kembali tombol
+                btnDl.disabled = false; btnCv.disabled = false;
+                btnDl.classList.remove('opacity-50'); btnCv.classList.remove('opacity-50');
+            }
+        }
+    </script>
+</body>
+</html>

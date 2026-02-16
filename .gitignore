@@ -1,0 +1,12 @@
+# Mengabaikan folder virtual environment
+venv/
+__pycache__/
+
+# Mengabaikan file video (PENTING!)
+*.mp4
+*.mkv
+Downloads/
+Clipper_Uploads/
+
+# Mengabaikan file sistem Mac
+.DS_Store
