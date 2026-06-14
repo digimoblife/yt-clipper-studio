@@ -29,7 +29,23 @@
         </div>
 
         <div class="bg-white p-8 rounded-3xl shadow-xl">
-            <h2 class="text-lg font-bold mb-4 border-b pb-2">2. Convert Lokal ke Portrait</h2>
+            <h2 class="text-lg font-bold mb-4 border-b pb-2">2. Download Video Full</h2>
+            <div class="space-y-4">
+                <input type="text" id="full-url" placeholder="URL YouTube" class="w-full p-3 border-2 rounded-xl outline-none focus:border-red-500">
+                <select id="full-quality" class="w-full p-3 border-2 rounded-xl">
+                    <option value="best">Best Quality</option>
+                    <option value="1080p">1080p (Full HD)</option>
+                    <option value="720p">720p (HD)</option>
+                    <option value="480p">480p (SD)</option>
+                    <option value="360p">360p</option>
+                </select>
+                <input type="text" id="full-name" placeholder="Nama File (Opsional)" class="w-full p-3 border-2 rounded-xl">
+                <button onclick="proses('download-full')" id="btn-df" class="w-full bg-red-600 text-white py-4 rounded-2xl font-bold hover:bg-red-700 transition">DOWNLOAD FULL!</button>
+            </div>
+        </div>
+
+        <div class="bg-white p-8 rounded-3xl shadow-xl">
+            <h2 class="text-lg font-bold mb-4 border-b pb-2">3. Convert Lokal ke Portrait</h2>
             <div class="space-y-4">
                 <input type="file" id="file-input" accept="video/mp4" class="block w-full text-sm text-slate-500 border-2 border-dashed p-4 rounded-xl">
                 <button onclick="proses('convert')" id="btn-cv" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition">CONVERT SEKARANG</button>
@@ -43,11 +59,11 @@
         async function proses(tipe) {
             const btnDl = document.getElementById('btn-dl');
             const btnCv = document.getElementById('btn-cv');
+            const btnDf = document.getElementById('btn-df');
             const status = document.getElementById('status');
 
-            // Disable Tombol & Tampilkan Status
-            btnDl.disabled = true; btnCv.disabled = true;
-            btnDl.classList.add('opacity-50'); btnCv.classList.add('opacity-50');
+            btnDl.disabled = true; btnCv.disabled = true; btnDf.disabled = true;
+            btnDl.classList.add('opacity-50'); btnCv.classList.add('opacity-50'); btnDf.classList.add('opacity-50');
             status.classList.remove('hidden');
             status.className = "block p-6 bg-white rounded-3xl text-center shadow-xl font-bold text-blue-600";
             status.innerText = "⏳ Sedang memproses... Harap tunggu sebentar.";
@@ -64,6 +80,16 @@
                             end: document.getElementById('end').value,
                             mode: document.getElementById('mode').value,
                             custom_name: document.getElementById('custom_name').value
+                        })
+                    });
+                } else if (tipe === 'download-full') {
+                    res = await fetch('/download-full', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            url: document.getElementById('full-url').value,
+                            quality: document.getElementById('full-quality').value,
+                            custom_name: document.getElementById('full-name').value
                         })
                     });
                 } else {
@@ -83,9 +109,8 @@
             } catch (err) {
                 status.innerText = "❌ Gagal menyambung ke server lokal.";
             } finally {
-                // Aktifkan kembali tombol
-                btnDl.disabled = false; btnCv.disabled = false;
-                btnDl.classList.remove('opacity-50'); btnCv.classList.remove('opacity-50');
+                btnDl.disabled = false; btnCv.disabled = false; btnDf.disabled = false;
+                btnDl.classList.remove('opacity-50'); btnCv.classList.remove('opacity-50'); btnDf.classList.remove('opacity-50');
             }
         }
     </script>
